@@ -29,7 +29,8 @@ import kotlinx.coroutines.launch
 @Composable
 fun HomeScreen(
     viewModel: HomeViewModel = hiltViewModel(),
-    onTopicClick: (String) -> Unit
+    onTopicClick: (String) -> Unit,
+    onQrClick: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
@@ -62,6 +63,18 @@ fun HomeScreen(
                     selected = true,
                     onClick = { scope.launch { drawerState.close() } },
                     icon = { Icon(Icons.Default.Home, contentDescription = null) },
+                    modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
+                )
+                NavigationDrawerItem(
+                    label = { Text("Código QR") },
+                    selected = false,
+                    onClick = { 
+                        scope.launch { 
+                            drawerState.close()
+                            onQrClick()
+                        } 
+                    },
+                    icon = { Icon(Icons.Default.QrCode, contentDescription = null) },
                     modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
                 )
                 NavigationDrawerItem(

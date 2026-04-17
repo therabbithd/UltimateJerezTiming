@@ -9,4 +9,6 @@ sealed class Route {
 
     @Serializable
     data class Detail(val id: String) : Route()
+    @Serializable
+    data object Qr : Route()
 }
