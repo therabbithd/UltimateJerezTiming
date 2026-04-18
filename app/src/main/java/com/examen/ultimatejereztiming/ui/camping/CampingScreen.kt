@@ -1,4 +1,4 @@
-package com.examen.ultimatejereztiming.ui.home
+package com.examen.ultimatejereztiming.ui.camping
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -14,7 +14,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -23,20 +22,23 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.examen.ultimatejereztiming.data.model.ContentType
 import com.examen.ultimatejereztiming.data.model.GuideTopic
+import com.examen.ultimatejereztiming.ui.home.HomeViewModel
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeScreen(
+fun CampingScreen(
     viewModel: HomeViewModel = hiltViewModel(),
     onTopicClick: (String) -> Unit,
     onQrClick: () -> Unit,
-    onCampingClick: () -> Unit,
+    onHomeClick: () -> Unit,
     onScheduleClick: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
+
+    val campingTopics = uiState.topics.filter { it.category == "Campamento" }
 
     ModalNavigationDrawer(
         drawerState = drawerState,
@@ -62,8 +64,13 @@ fun HomeScreen(
                 Spacer(Modifier.height(12.dp))
                 NavigationDrawerItem(
                     label = { Text("Inicio") },
-                    selected = true,
-                    onClick = { scope.launch { drawerState.close() } },
+                    selected = false,
+                    onClick = { 
+                        scope.launch { 
+                            drawerState.close()
+                            onHomeClick() 
+                        } 
+                    },
                     icon = { Icon(Icons.Default.Home, contentDescription = null) },
                     modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
                 )
@@ -84,7 +91,7 @@ fun HomeScreen(
                     selected = false,
                     onClick = { 
                         scope.launch { 
-                            drawerState.close()
+                            drawerState.close() 
                             onScheduleClick()
                         } 
                     },
@@ -94,11 +101,10 @@ fun HomeScreen(
 
                 NavigationDrawerItem(
                     label = { Text("Campamento") },
-                    selected = false,
+                    selected = true,
                     onClick = { 
                         scope.launch { 
                             drawerState.close() 
-                            onCampingClick()
                         } 
                     },
                     icon = { Icon(Icons.Default.Park, contentDescription = null) },
@@ -112,7 +118,7 @@ fun HomeScreen(
                 CenterAlignedTopAppBar(
                     title = {
                         Text(
-                            "GP JEREZ 2026",
+                            "Campamento",
                             fontWeight = FontWeight.ExtraBold,
                             letterSpacing = 2.sp
                         )
@@ -135,7 +141,6 @@ fun HomeScreen(
                 }
             } else {
                 Column(modifier = Modifier.padding(padding)) {
-                    // Category chips or featured banner could go here
                     LazyVerticalGrid(
                         columns = GridCells.Fixed(2),
                         contentPadding = PaddingValues(16.dp),
@@ -143,7 +148,7 @@ fun HomeScreen(
                         verticalArrangement = Arrangement.spacedBy(16.dp),
                         modifier = Modifier.fillMaxSize()
                     ) {
-                        items(uiState.topics) { topic ->
+                        items(campingTopics) { topic ->
                             TopicCard(topic = topic, onClick = { onTopicClick(topic.id) })
                         }
                     }
@@ -155,9 +160,10 @@ fun HomeScreen(
 
 @Composable
 fun TopicCard(topic: GuideTopic, onClick: () -> Unit) {
-    val icon = when (topic.type) {
-        ContentType.SCHEDULE -> Icons.Default.Schedule
-        ContentType.IMAGE -> Icons.Default.Map
+    val icon = when {
+        topic.type == ContentType.IMAGE -> Icons.Default.Map
+        topic.title.contains("Plano", ignoreCase = true) -> Icons.Default.Map
+        topic.title.contains("Acceso", ignoreCase = true) -> Icons.Default.Directions
         else -> Icons.Default.Description
     }
 
@@ -173,7 +179,6 @@ fun TopicCard(topic: GuideTopic, onClick: () -> Unit) {
             .clickable { onClick() }
     ) {
         Box(modifier = Modifier.fillMaxSize()) {
-            // Subtle gradient background
             Box(
                 modifier = Modifier
                     .fillMaxSize()

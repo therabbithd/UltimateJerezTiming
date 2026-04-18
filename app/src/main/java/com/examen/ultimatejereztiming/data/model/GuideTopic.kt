@@ -4,7 +4,8 @@ enum class ContentType {
     MARKDOWN,
     IMAGE,
     SCHEDULE,
-    NATIVE_TEXT
+    NATIVE_TEXT,
+    FAQ
 }
 
 data class GuideTopic(

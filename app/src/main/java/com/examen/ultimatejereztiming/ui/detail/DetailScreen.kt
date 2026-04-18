@@ -1,19 +1,33 @@
 package com.examen.ultimatejereztiming.ui.detail
 
-import androidx.compose.foundation.background
+import androidx.compose.animation.animateContentSize
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectTransformGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Call
+import androidx.compose.material.icons.filled.Directions
+import androidx.compose.material.icons.filled.ExpandLess
+import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -81,12 +95,40 @@ fun DetailScreen(
                                 ScheduleRenderer(content = topic.content)
                             }
                             ContentType.IMAGE -> {
+                                var scale by remember { mutableFloatStateOf(1f) }
+                                var offset by remember { mutableStateOf(Offset.Zero) }
+
                                 AsyncImage(
                                     model = "file:///android_asset/${topic.assetPath}",
                                     contentDescription = topic.title,
-                                    contentScale = ContentScale.Fit,
-                                    modifier = Modifier.fillMaxWidth().padding(8.dp)
+                                    contentScale = ContentScale.FillWidth,
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .pointerInput(Unit) {
+                                            detectTransformGestures { _, pan, zoom, _ ->
+                                                scale = (scale * zoom).coerceIn(1f, 5f)
+                                                if (scale > 1f) {
+                                                    val maxOffsetX = (size.width * (scale - 1)) / 2
+                                                    val maxOffsetY = (size.height * (scale - 1)) / 2
+                                                    offset = Offset(
+                                                        x = (offset.x + pan.x * scale).coerceIn(-maxOffsetX, maxOffsetX),
+                                                        y = (offset.y + pan.y * scale).coerceIn(-maxOffsetY, maxOffsetY)
+                                                    )
+                                                } else {
+                                                    offset = Offset.Zero
+                                                }
+                                            }
+                                        }
+                                        .graphicsLayer {
+                                            scaleX = scale
+                                            scaleY = scale
+                                            translationX = offset.x
+                                            translationY = offset.y
+                                        }
                                 )
+                            }
+                            ContentType.FAQ -> {
+                                FaqRenderer(content = topic.content)
                             }
                             else -> {
                                 Text(topic.content, modifier = Modifier.padding(16.dp))
@@ -100,9 +142,11 @@ fun DetailScreen(
 }
 
 @Composable
-fun NativeContentRenderer(content: String) {
+fun NativeContentRenderer(content: String, modifier: Modifier = Modifier.padding(16.dp)) {
     val lines = content.lines()
-    Column(modifier = Modifier.padding(16.dp)) {
+    val uriHandler = LocalUriHandler.current
+    
+    Column(modifier = modifier) {
         lines.forEach { line ->
             when {
                 line.startsWith("# ") -> {
@@ -118,6 +162,25 @@ fun NativeContentRenderer(content: String) {
                     Row(modifier = Modifier.padding(vertical = 4.dp)) {
                         Text("• ", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
                         Text(text = line.substring(2), style = MaterialTheme.typography.bodyLarge)
+                    }
+                }
+                line.startsWith("[BUTTON|") && line.endsWith("]") -> {
+                    val parts = line.substring(8, line.length - 1).split("|")
+                    if (parts.size >= 2) {
+                        val label = parts[0]
+                        val url = parts[1]
+                        Button(
+                            onClick = { try { uriHandler.openUri(url) } catch (e: Exception) {} },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 8.dp),
+                            shape = MaterialTheme.shapes.medium
+                        ) {
+                            val icon = if (url.startsWith("tel:")) Icons.Default.Call else Icons.Default.Directions
+                            Icon(icon, contentDescription = null)
+                            Spacer(Modifier.width(8.dp))
+                            Text(label, fontWeight = FontWeight.Bold)
+                        }
                     }
                 }
                 line.isNotBlank() -> {
@@ -181,6 +244,79 @@ fun ScheduleRenderer(content: String) {
                         color = MaterialTheme.colorScheme.onSurface
                     )
                 }
+            }
+        }
+    }
+}
+
+@Composable
+fun FaqRenderer(content: String) {
+    val sections = content.split("# ").filter { it.isNotBlank() }
+    
+    Column(modifier = Modifier.padding(16.dp)) {
+        sections.forEach { section ->
+            val lines = section.lines()
+            val question = lines.first().trim()
+            val answer = lines.drop(1).joinToString("\n").trim()
+            
+            if (question.isNotBlank()) {
+                FaqItem(question, answer)
+            }
+        }
+        Spacer(modifier = Modifier.height(16.dp))
+    }
+}
+
+@Composable
+fun FaqItem(question: String, answer: String) {
+    var expanded by remember { mutableStateOf(false) }
+    
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 6.dp)
+            .clickable { expanded = !expanded },
+        colors = CardDefaults.cardColors(
+            containerColor = if (expanded) 
+                MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.7f) 
+            else 
+                MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
+        ),
+        shape = MaterialTheme.shapes.large
+    ) {
+        Column(
+            modifier = Modifier
+                .padding(16.dp)
+                .animateContentSize()
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(
+                    text = question,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.weight(1f),
+                    color = if (expanded) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
+                )
+                IconButton(onClick = { expanded = !expanded }) {
+                    Icon(
+                        imageVector = if (expanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
+                        contentDescription = if (expanded) "Colapsar" else "Expandir",
+                        tint = if (expanded) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+            if (expanded) {
+                Divider(
+                    modifier = Modifier.padding(vertical = 8.dp),
+                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)
+                )
+                NativeContentRenderer(
+                    content = answer,
+                    modifier = Modifier.padding(0.dp)
+                )
             }
         }
     }

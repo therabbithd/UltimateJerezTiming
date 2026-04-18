@@ -1,12 +1,11 @@
-package com.examen.ultimatejereztiming.ui.home
+package com.examen.ultimatejereztiming.ui.schedule
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -14,29 +13,31 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.examen.ultimatejereztiming.data.model.ContentType
-import com.examen.ultimatejereztiming.data.model.GuideTopic
+import com.examen.ultimatejereztiming.ui.home.HomeViewModel
 import kotlinx.coroutines.launch
+import androidx.compose.ui.text.style.TextAlign
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeScreen(
+fun DayScheduleScreen(
+    dayId: String,
     viewModel: HomeViewModel = hiltViewModel(),
-    onTopicClick: (String) -> Unit,
-    onQrClick: () -> Unit,
+    onBackClick: () -> Unit,
+    onHomeClick: () -> Unit,
     onCampingClick: () -> Unit,
-    onScheduleClick: () -> Unit
+    onScheduleClick: () -> Unit,
+    onQrClick: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
+
+    val topic = uiState.topics.find { it.id == dayId }
 
     ModalNavigationDrawer(
         drawerState = drawerState,
@@ -62,8 +63,13 @@ fun HomeScreen(
                 Spacer(Modifier.height(12.dp))
                 NavigationDrawerItem(
                     label = { Text("Inicio") },
-                    selected = true,
-                    onClick = { scope.launch { drawerState.close() } },
+                    selected = false,
+                    onClick = { 
+                        scope.launch { 
+                            drawerState.close()
+                            onHomeClick() 
+                        } 
+                    },
                     icon = { Icon(Icons.Default.Home, contentDescription = null) },
                     modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
                 )
@@ -81,7 +87,7 @@ fun HomeScreen(
                 )
                 NavigationDrawerItem(
                     label = { Text("Programación") },
-                    selected = false,
+                    selected = true,
                     onClick = { 
                         scope.launch { 
                             drawerState.close()
@@ -112,14 +118,18 @@ fun HomeScreen(
                 CenterAlignedTopAppBar(
                     title = {
                         Text(
-                            "GP JEREZ 2026",
-                            fontWeight = FontWeight.ExtraBold,
-                            letterSpacing = 2.sp
+                            text = topic?.title ?: "Detalle Día",
+                            fontWeight = FontWeight.Bold
                         )
                     },
                     navigationIcon = {
+                        IconButton(onClick = onBackClick) {
+                            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Volver")
+                        }
+                    },
+                    actions = {
                         IconButton(onClick = { scope.launch { drawerState.open() } }) {
-                            Icon(Icons.Default.Menu, contentDescription = "Menu")
+                            Icon(Icons.Default.Menu, contentDescription = "Menú")
                         }
                     },
                     colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
@@ -133,20 +143,11 @@ fun HomeScreen(
                 Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     CircularProgressIndicator()
                 }
+            } else if (topic != null) {
+                ScheduleList(content = topic.content, modifier = Modifier.padding(padding))
             } else {
-                Column(modifier = Modifier.padding(padding)) {
-                    // Category chips or featured banner could go here
-                    LazyVerticalGrid(
-                        columns = GridCells.Fixed(2),
-                        contentPadding = PaddingValues(16.dp),
-                        horizontalArrangement = Arrangement.spacedBy(16.dp),
-                        verticalArrangement = Arrangement.spacedBy(16.dp),
-                        modifier = Modifier.fillMaxSize()
-                    ) {
-                        items(uiState.topics) { topic ->
-                            TopicCard(topic = topic, onClick = { onTopicClick(topic.id) })
-                        }
-                    }
+                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Text("No se encontró la programación.")
                 }
             }
         }
@@ -154,67 +155,69 @@ fun HomeScreen(
 }
 
 @Composable
-fun TopicCard(topic: GuideTopic, onClick: () -> Unit) {
-    val icon = when (topic.type) {
-        ContentType.SCHEDULE -> Icons.Default.Schedule
-        ContentType.IMAGE -> Icons.Default.Map
-        else -> Icons.Default.Description
+fun ScheduleList(content: String, modifier: Modifier = Modifier) {
+    val items = content.lines().filter { it.isNotBlank() }.map { line ->
+        val parts = line.split("|")
+        val time = parts.getOrNull(0)?.trim() ?: ""
+        val event = parts.getOrNull(1)?.trim() ?: ""
+        time to event
     }
 
-    Card(
-        elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface
-        ),
-        shape = MaterialTheme.shapes.large,
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(140.dp)
-            .clickable { onClick() }
+    LazyColumn(
+        modifier = modifier.fillMaxSize(),
+        contentPadding = PaddingValues(16.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        Box(modifier = Modifier.fillMaxSize()) {
-            // Subtle gradient background
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(
-                        Brush.horizontalGradient(
-                            listOf(Color.Transparent, MaterialTheme.colorScheme.primary.copy(alpha = 0.05f))
-                        )
-                    )
-            )
-            
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(16.dp),
-                verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Surface(
-                    shape = MaterialTheme.shapes.medium,
-                    color = MaterialTheme.colorScheme.primaryContainer,
-                    modifier = Modifier.size(48.dp)
-                ) {
-                    Box(contentAlignment = Alignment.Center) {
-                        Icon(
-                            imageVector = icon,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.size(24.dp)
-                        )
-                    }
-                }
-                Spacer(modifier = Modifier.height(12.dp))
-                Text(
-                    text = topic.title,
-                    textAlign = TextAlign.Center,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 14.sp,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    maxLines = 2
-                )
-            }
+        items(items) { (time, event) ->
+            ScheduleItem(time = time, event = event)
         }
     }
 }
+
+@Composable
+fun ScheduleItem(time: String, event: String) {
+    Card(
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
+        ),
+        shape = MaterialTheme.shapes.medium,
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Row(
+            modifier = Modifier
+                .padding(16.dp)
+                .fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Box(
+                modifier = Modifier
+                    .width(85.dp)
+                    .background(
+                        color = MaterialTheme.colorScheme.primaryContainer,
+                        shape = MaterialTheme.shapes.small
+                    )
+                    .padding(vertical = 6.dp, horizontal = 8.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = time,
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer,
+                    fontWeight = FontWeight.Bold,
+                    textAlign = TextAlign.Center
+                )
+            }
+            
+            Spacer(modifier = Modifier.width(16.dp))
+            
+            Text(
+                text = event,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurface,
+                modifier = Modifier.weight(1f)
+            )
+        }
+    }
+}
+

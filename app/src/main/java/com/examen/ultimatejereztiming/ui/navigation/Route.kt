@@ -11,4 +11,13 @@ sealed class Route {
     data class Detail(val id: String) : Route()
     @Serializable
     data object Qr : Route()
+
+    @Serializable
+    data object Camping : Route()
+
+    @Serializable
+    data object Schedule : Route()
+
+    @Serializable
+    data class DaySchedule(val id: String) : Route()
 }
