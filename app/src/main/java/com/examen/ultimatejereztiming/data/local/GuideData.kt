@@ -188,22 +188,41 @@ object GuideData {
             """.trimIndent()
         ),
         GuideTopic(
+            id = "prog_jueves",
+            title = "Programación Jueves 23",
+            type = ContentType.SCHEDULE,
+            category = "Programación",
+            content = """
+                12:45 - 14:00|[Pista] Track Technical Test
+                14:00 - 19:00|[Pista] Two Wheels for Life - Paddock Visit
+                14:30|[Pista] Track Safety Inspection
+                14:30 - 16:00|[Pista] Riders Track Familiarisation
+                16:00|[Pista] Press Conference
+                16:30 - 17:30|[Pista] Public Pit Lane Walk
+            """.trimIndent()
+        ),
+        GuideTopic(
             id = "prog_viernes",
             title = "Programación Viernes 24",
             type = ContentType.SCHEDULE,
             category = "Programación",
             content = """
                 08:30|Bienvenida
-                09:00 - 09:35|Free Practice 1 Moto3
-                09:50 - 10:30|Free Practice 1 Moto2
-                10:45 - 11:30|Free Practice 1 Moto GP
+                09:00 - 09:35|[Pista] Moto3™ Free Practice 1
+                09:50 - 10:30|[Pista] Moto2™ Free Practice 1
+                10:45 - 11:30|[Pista] MotoGP™ Free Practice 1
                 11:30 - 13:15|Speaker - DJ - Animación
-                13:15 - 13:50|Practice Moto3
-                14:05 - 14:45|Practice Moto2
-                15:00 - 16:00|Practice Moto GP
+                12:00 - 12:25|[Pista] Red Bull MotoGP™ Rookies Cup Free Practice 1
+                13:15 - 13:50|[Pista] Moto3™ Practice
+                14:05 - 14:45|[Pista] Moto2™ Practice
+                15:00 - 16:00|[Pista] MotoGP™ Practice
                 16:00|Mascota + Regalos
+                16:25 - 16:50|[Pista] Red Bull MotoGP™ Rookies Cup Free Practice 2
+                16:55 - 17:55|[Pista] Media Laps
                 17:00 - 18:30|Firma Pilotos
+                18:00 - 18:20|[Pista] Red Bull MotoGP™ Rookies Cup Qualifying
                 18:30 - 18:45|Acción DAZN
+                18:30 - 19:00|[Pista] MotoGP™ Premier Track Tour
                 18:45|Concierto Décum
                 20:00|Despedida Fanzone
             """.trimIndent()
@@ -215,19 +234,28 @@ object GuideData {
             category = "Programación",
             content = """
                 08:30|Bienvenida
-                08:40 - 09:10|Free Practice 2 Moto3
-                09:25 - 09:55|Free Practice 2 Moto2
-                10:10 - 10:35|Free Practice 2 Moto GP
-                10:50 - 11:05|Qualifying 1 Moto GP
-                11:15 - 11:30|Qualifying 2 Moto GP
-                12:45 - 13:00|Qualifying 1 Moto3
-                13:10 - 13:25|Qualifying 2 Moto3
-                13:40 - 13:55|Qualifying 1 Moto2
-                14:05 - 14:20|Qualifying 2 Moto2
-                15:00|Sprint Moto GP
+                08:40 - 09:10|[Pista] Moto3™ Free Practice 2
+                09:25 - 09:55|[Pista] Moto2™ Free Practice 2
+                10:10 - 10:40|[Pista] MotoGP™ Free Practice 2
+                10:50 - 11:05|[Pista] MotoGP™ Qualifying 1
+                11:15 - 11:30|[Pista] MotoGP™ Qualifying 2
+                11:35 - 12:00|[Pista] MotoGP™ VIP Village™ Pit Lane Walk
+                11:35 - 12:00|[Pista] MotoEX2
+                11:45 - 12:15|[Pista] MotoGP™ & Moto3™ Hero Walk
+                12:15 - 12:30|[Pista] Red Bull FMX Show (Turn 9-10)
+                12:45 - 13:00|[Pista] Moto3™ Qualifying 1
+                13:10 - 13:25|[Pista] Moto3™ Qualifying 2
+                13:40 - 13:55|[Pista] Moto2™ Qualifying 1
+                13:00 - 13:25|[Pista] MotoEX2
+                14:05 - 14:20|[Pista] Moto2™ Qualifying 2
+                15:00|[Pista] MotoGP™ Tissot Sprint (12 Laps)
                 16:00|DJ Set + Sorteos
+                16:10|[Pista] Red Bull MotoGP™ Rookies Cup Race 1 (14 Laps)
+                16:35 - 16:50|[Pista] MotoEX2
                 17:00|Firma Pilotos
+                17:00 - 17:15|[Pista] MotoEX2
                 18:00 - 18:15|Acción DAZN
+                17:45 - 18:30|[Pista] BMW M Laps
                 18:30|Actuación Tony Grox y Lucycalys
                 19:00|Actuación La Banda del Capitán Inhumano
                 22:00|Despedida Fanzone
@@ -240,11 +268,19 @@ object GuideData {
             category = "Programación",
             content = """
                 08:30|Bienvenida
-                09:40|Warm Up Moto GP
+                08:45|[Pista] Red Bull MotoGP™ Rookies Cup Race 2 (14 Laps)
+                09:40 - 09:50|[Pista] MotoGP™ Warm Up
                 09:50|DJ Set - Speaker - Animación
-                11:00|Moto3 Race
-                12:15|Moto2 Race
-                14:00|Moto GP Race
+                10:00|[Pista] MotoGP™ Rider Parade
+                10:00 - 10:30|[Pista] MotoGP™ VIP Village™ Pit Lane Walk
+                10:20 - 10:40|[Pista] MotoGP™ Hero Walk
+                11:00|[Pista] Moto3™ Race (19 Laps)
+                12:15|[Pista] Moto2™ Race (21 Laps)
+                13:00 - 13:25|[Pista] MotoEX2
+                13:51|[Pista] Opening Ceremony
+                13:52|[Pista] Patrulla Aspa Flyover
+                14:00|[Pista] MotoGP™ Grand Prix (25 Laps)
+                15:00 - 15:30|[Pista] Fan Track Walk
                 15:30|Fiesta Despedida
             """.trimIndent()
         ),

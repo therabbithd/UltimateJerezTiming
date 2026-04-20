@@ -176,6 +176,9 @@ fun ScheduleList(content: String, modifier: Modifier = Modifier) {
 
 @Composable
 fun ScheduleItem(time: String, event: String) {
+    val isPista = event.contains("[Pista]")
+    val eventText = event.replace("[Pista] ", "").replace("[Pista]", "").trim()
+
     Card(
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
         colors = CardDefaults.cardColors(
@@ -211,12 +214,28 @@ fun ScheduleItem(time: String, event: String) {
             
             Spacer(modifier = Modifier.width(16.dp))
             
-            Text(
-                text = event,
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurface,
-                modifier = Modifier.weight(1f)
-            )
+            Column(modifier = Modifier.weight(1f)) {
+                if (isPista) {
+                    Surface(
+                        color = MaterialTheme.colorScheme.error,
+                        shape = MaterialTheme.shapes.extraSmall,
+                        modifier = Modifier.padding(bottom = 4.dp)
+                    ) {
+                        Text(
+                            text = "PISTA",
+                            color = Color.White,
+                            style = MaterialTheme.typography.labelSmall,
+                            fontWeight = FontWeight.ExtraBold,
+                            modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                        )
+                    }
+                }
+                Text(
+                    text = eventText,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+            }
         }
     }
 }

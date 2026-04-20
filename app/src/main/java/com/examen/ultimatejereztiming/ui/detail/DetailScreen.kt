@@ -182,6 +182,9 @@ fun ScheduleRenderer(content: String) {
             val time = parts[0]
             val event = parts[1]
             
+            val isPista = event.contains("[Pista]")
+            val eventText = event.replace("[Pista] ", "").replace("[Pista]", "").trim()
+
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -212,12 +215,29 @@ fun ScheduleRenderer(content: String) {
                         )
                     }
                     Spacer(modifier = Modifier.width(16.dp))
-                    Text(
-                        text = event,
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.SemiBold,
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
+                    Column(modifier = Modifier.weight(1f)) {
+                        if (isPista) {
+                            Surface(
+                                color = MaterialTheme.colorScheme.error,
+                                shape = MaterialTheme.shapes.extraSmall,
+                                modifier = Modifier.padding(bottom = 4.dp)
+                            ) {
+                                Text(
+                                    text = "PISTA",
+                                    color = Color.White,
+                                    style = MaterialTheme.typography.labelSmall,
+                                    fontWeight = FontWeight.ExtraBold,
+                                    modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                                )
+                            }
+                        }
+                        Text(
+                            text = eventText,
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.SemiBold,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                    }
                 }
             }
         }
