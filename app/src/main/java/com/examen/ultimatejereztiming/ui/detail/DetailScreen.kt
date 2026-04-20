@@ -36,6 +36,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import com.examen.ultimatejereztiming.data.model.ContentType
+import com.examen.ultimatejereztiming.ui.components.ZoomableImage
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -95,36 +96,10 @@ fun DetailScreen(
                                 ScheduleRenderer(content = topic.content)
                             }
                             ContentType.IMAGE -> {
-                                var scale by remember { mutableFloatStateOf(1f) }
-                                var offset by remember { mutableStateOf(Offset.Zero) }
-
-                                AsyncImage(
+                                ZoomableImage(
                                     model = "file:///android_asset/${topic.assetPath}",
                                     contentDescription = topic.title,
-                                    contentScale = ContentScale.FillWidth,
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .pointerInput(Unit) {
-                                            detectTransformGestures { _, pan, zoom, _ ->
-                                                scale = (scale * zoom).coerceIn(1f, 5f)
-                                                if (scale > 1f) {
-                                                    val maxOffsetX = (size.width * (scale - 1)) / 2
-                                                    val maxOffsetY = (size.height * (scale - 1)) / 2
-                                                    offset = Offset(
-                                                        x = (offset.x + pan.x * scale).coerceIn(-maxOffsetX, maxOffsetX),
-                                                        y = (offset.y + pan.y * scale).coerceIn(-maxOffsetY, maxOffsetY)
-                                                    )
-                                                } else {
-                                                    offset = Offset.Zero
-                                                }
-                                            }
-                                        }
-                                        .graphicsLayer {
-                                            scaleX = scale
-                                            scaleY = scale
-                                            translationX = offset.x
-                                            translationY = offset.y
-                                        }
+                                    modifier = Modifier.fillMaxWidth().height(400.dp) // Set a height for maps
                                 )
                             }
                             ContentType.FAQ -> {
